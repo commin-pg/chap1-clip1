@@ -1,10 +1,12 @@
 package com.fastcampus.chap1clip1;
 
+import com.fastcampus.chap1clip1.producer.ClipProducer;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.kafka.core.KafkaTemplate;
+
+import java.nio.charset.StandardCharsets;
 
 @SpringBootApplication
 public class Chap1Clip1Application {
@@ -14,9 +16,21 @@ public class Chap1Clip1Application {
 	}
 
 	@Bean
-	public ApplicationRunner runner( KafkaTemplate<String,String> kafkaTemplate ){
+	public ApplicationRunner runner(
+
+//			KafkaTemplate<String,String> kafkaTemplate
+			ClipProducer producer
+
+	){
 		return args -> {
-			kafkaTemplate.send( "quickstart-events", "hello-world" );
+//			kafkaTemplate.send( "clip3", "hello, Clip3" );
+			producer.async("clip3", "Hello Clip3 Async");
+			producer.sync("clip3", "Hello!! Clip3 Sync");
+
+			producer.routingSend("clip3", "Hello?? Clip3 Routing");
+			producer.routingSendBytes("clip3-bytes", "Hello?? Clip3 Routing-bytes".getBytes(StandardCharsets.UTF_8));
+
+			producer.replyingSend("clip3-request", "Ping Clip3");
 		};
 	}
 
