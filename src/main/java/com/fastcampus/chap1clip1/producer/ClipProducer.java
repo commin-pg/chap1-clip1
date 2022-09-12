@@ -21,14 +21,9 @@ public class ClipProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    private final RoutingKafkaTemplate routingKafkaTemplate;
-
-    private final ReplyingKafkaTemplate<String,String,String> replyingKafkaTemplate;
-
-    public ClipProducer(KafkaTemplate<String,String> kafkaTemplate, RoutingKafkaTemplate routingKafkaTemplate, ReplyingKafkaTemplate<String, String, String> replyingKafkaTemplate) {
+    public ClipProducer(KafkaTemplate<String,String> kafkaTemplate
+    ) {
         this.kafkaTemplate = kafkaTemplate;
-        this.routingKafkaTemplate = routingKafkaTemplate;
-        this.replyingKafkaTemplate = replyingKafkaTemplate;
     }
 
     public void async(String topic, String message){
@@ -50,35 +45,6 @@ public class ClipProducer {
 
     }
 
-    public void sync(String topic, String message){
-        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, message);
-        try {
-            System.out.println("Success To Send Sync Message.");
-            future.get(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (TimeoutException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void routingSend(String topic , String message){
-        routingKafkaTemplate.send(topic, message);
-    }
-
-    public void routingSendBytes(String topic , byte[] message){
-        routingKafkaTemplate.send(topic, message);
-    }
-
-
-    public void replyingSend(String topic, String message) throws ExecutionException, InterruptedException, TimeoutException {
-        ProducerRecord<String, String> record = new ProducerRecord<>(topic,message);
-        RequestReplyFuture<String, String, String> replyFuture = replyingKafkaTemplate.sendAndReceive(record);
-        ConsumerRecord<String, String> consumerRecord = replyFuture.get(10, TimeUnit.SECONDS);
-        System.out.println(consumerRecord.value());
-    }
 
 
 }
